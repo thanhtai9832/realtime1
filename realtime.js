@@ -5,7 +5,7 @@ const params = new URLSearchParams(window.location.search);
 let unpackAt = parseInt(params.get('unpack_at'), 10); // Thời gian hết hạn
 let diamondCount = params.get('diamond_count') || 'N/A'; // Số lượng kim cương
 let peopleCount = params.get('people_count') || 'N/A'; // Số lượng người
-let tiktokId = params.get('tiktok_id') || 'Không có ID'; // Lấy TikTok ID từ URL (thêm mới)
+let tiktokId = params.get('tiktok_id') || 'Không có ID'; // Lấy TikTok ID
 
 // Log để kiểm tra giá trị
 console.log("unpackAt:", unpackAt);
@@ -44,19 +44,19 @@ function formatCountdown(milliseconds) {
 const countdownElement = document.getElementById('countdown');
 const timer = setInterval(() => {
     if (remainingTime <= 0) {
-        clearInterval(timer);
+        clearInterval(timer); // Dừng bộ đếm khi hết giờ
         countdownElement.innerHTML = `
-            TikTok ID: ${tiktokId}<br><br> <!-- Hiển thị TikTok ID -->
-            ${box}<br><br>
+            TikTok ID: <b>${tiktokId}</b><br><br>
+            Box: <b>${box}</b><br><br>
             Hết giờ!<br><br>
-            ${expiryTime}
+            Thời gian hết hạn: ${expiryTime}
         `;
     } else {
         countdownElement.innerHTML = `
-            TikTok ID: ${tiktokId}<br><br> <!-- Hiển thị TikTok ID -->
-            ${box}<br><br>
-            ${formatCountdown(remainingTime)}<br><br>
-            ${expiryTime}
+            TikTok ID: <b>${tiktokId}</b><br><br>
+            Box: <b>${box}</b><br><br>
+            Đếm ngược: ${formatCountdown(remainingTime)}<br><br>
+            Thời gian hết hạn: ${expiryTime}
         `;
     }
     remainingTime -= 100; // Giảm thời gian còn lại mỗi 100ms (tương ứng 1/10 giây)
