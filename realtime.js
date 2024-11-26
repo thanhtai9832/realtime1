@@ -32,7 +32,7 @@ async function getServerTime() {
         return Math.floor(new Date(data.utc_datetime).getTime() / 1000); // Thời gian chuẩn (giây)
     } catch (error) {
         console.error('Error fetching server time:', error);
-        return Math.floor(Date.now() / 1000); // Dự phòng: dùng thời gian hệ thống
+        throw new Error('Could not retrieve server time');
     }
 }
 
@@ -45,34 +45,38 @@ function formatCountdown(milliseconds) {
 
 // Hiển thị và cập nhật bộ đếm
 async function startCountdown() {
-    const serverTime = await getServerTime(); // Lấy thời gian chuẩn từ API
-    const currentTime = serverTime; // Sử dụng thời gian từ server
-    const offset = 0.6; // Độ trễ (giây)
+    try {
+        const serverTime = await getServerTime(); // Lấy thời gian chuẩn từ API
+        const offset = 0.6; // Độ trễ (giây)
 
-    // Tính thời gian còn lại, đảm bảo không âm
-    let remainingTime = Math.max((unpackAt - currentTime - offset) * 1000, 0); // Chuyển sang mili giây
-    const expiryTime = new Date(unpackAt * 1000).toLocaleTimeString('vi-VN', { hour12: false }); // Thời gian hết hạn
+        // Tính thời gian còn lại, đảm bảo không âm
+        let remainingTime = Math.max((unpackAt - serverTime - offset) * 1000, 0); // Chuyển sang mili giây
+        const expiryTime = new Date(unpackAt * 1000).toLocaleTimeString('vi-VN', { hour12: false }); // Thời gian hết hạn
 
-    const countdownElement = document.getElementById('countdown');
-    const timer = setInterval(() => {
-        if (remainingTime <= 0) {
-            clearInterval(timer);
-            countdownElement.innerHTML = `
-                <span style="color: black; font-size: 34px;">Id -->  ${tiktokId}</span><br><br>
-                <span style="color: #b30000; font-size: 34px;">${box}</span><br>
-                <span style="color: black; font-size: 70px; font-weight: bold;">Hết giờ!</span><br><br>
-                <span style="color: black; font-size: 34px;">${expiryTime}</span>
-            `;
-        } else {
-            countdownElement.innerHTML = `
-                <span style="color: black; font-size: 34px;">Id -->  ${tiktokId}</span><br><br>
-                <span style="color: #b30000; font-size: 34px;">${box}</span><br>
-                <span style="color: black; font-size: 100px; font-weight: bold;">${formatCountdown(remainingTime)}</span><br><br>
-                <span style="color: black; font-size: 34px;">${expiryTime}</span>
-            `;
-        }
-        remainingTime -= 100; // Giảm thời gian còn lại mỗi 100ms (tương ứng 1/10 giây)
-    }, 100); // Cập nhật mỗi 100ms
+        const countdownElement = document.getElementById('countdown');
+        const timer = setInterval(() => {
+            if (remainingTime <= 0) {
+                clearInterval(timer);
+                countdownElement.innerHTML = `
+                    <span style="color: black; font-size: 34px;">Id -->  ${tiktokId}</span><br><br>
+                    <span style="color: #b30000; font-size: 34px;">${box}</span><br>
+                    <span style="color: black; font-size: 70px; font-weight: bold;">Hết giờ!</span><br><br>
+                    <span style="color: black; font-size: 34px;">${expiryTime}</span>
+                `;
+            } else {
+                countdownElement.innerHTML = `
+                    <span style="color: black; font-size: 34px;">Id -->  ${tiktokId}</span><br><br>
+                    <span style="color: #b30000; font-size: 34px;">${box}</span><br>
+                    <span style="color: black; font-size: 120px; font-weight: bold;">${formatCountdown(remainingTime)}</span><br><br>
+                    <span style="color: black; font-size: 34px;">${expiryTime}</span>
+                `;
+            }
+            remainingTime -= 100; // Giảm thời gian còn lại mỗi 100ms (tương ứng 1/10 giây)
+        }, 100); // Cập nhật mỗi 100ms
+    } catch (error) {
+        document.getElementById('countdown').textContent = 'Không thể tải thời gian từ server!';
+        console.error(error);
+    }
 }
 
 // Bắt đầu bộ đếm
