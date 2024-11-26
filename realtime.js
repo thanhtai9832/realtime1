@@ -46,16 +46,16 @@ const timer = setInterval(() => {
     if (remainingTime <= 0) {
         clearInterval(timer);
         countdownElement.innerHTML = `
-            <span style="color: black; font-size: 34px;">TikTok ID: ${tiktokId}</span><br><br>
-            <span style="color: black; font-size: 34px;">${box}</span><br><br>
+            <span style="color: black; font-size: 34px;">TikTok>> ${tiktokId}</span><br><br>
+            <span style="color: black; font-size: 34px;">${box}</span><br>
             <span style="color: black; font-size: 38px; font-weight: bold;">Hết giờ!</span><br><br>
             <span style="color: black; font-size: 34px;">${expiryTime}</span>
         `;
     } else {
         countdownElement.innerHTML = `
-            <span style="color: black; font-size: 34px;">TikTok ID: ${tiktokId}</span><br><br>
+            <span style="color: black; font-size: 34px;">TikTok>> ${tiktokId}</span><br><br>
             <span style="color: black; font-size: 34px;">${box}</span><br>
-            <span style="color: black; font-size: 50px; font-weight: bold;">${formatCountdown(remainingTime)}</span><br>
+            <span style="color: black; font-size: 50px; font-weight: bold;">${formatCountdown(remainingTime)}</span><br><br>
             <span style="color: black; font-size: 34px;">${expiryTime}</span>
         `;
     }
