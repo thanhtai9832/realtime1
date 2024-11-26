@@ -1,80 +1,63 @@
-async def send_telegram_message(bot_token, chat_id, message, success_count, total_apis, current_rooms_count, total_rooms, json_file_path='timer.json'):
-    try:
-        logging.info("Bắt đầu quá trình gửi tin nhắn tới Telegram.")
-        
-        # Xử lý số liệu thống kê
-        success_count_value = success_count[0] if isinstance(success_count, list) and success_count else 0
-        total_apis_value = total_apis if total_apis else 0
+// Lấy tham số từ URL
+const params = new URLSearchParams(window.location.search);
 
-        if success_count_value > total_apis_value:
-            success_count_value = total_apis_value
+// Lấy các tham số từ URL và log để kiểm tra
+let unpackAt = parseInt(params.get('unpack_at'), 10); // Thời gian hết hạn
+let diamondCount = params.get('diamond_count') || 'N/A'; // Số lượng kim cương
+let peopleCount = params.get('people_count') || 'N/A'; // Số lượng người
+let tiktokId = params.get('tiktok_id') || 'Không có ID'; // Lấy TikTok ID từ URL (thêm mới)
 
-        # Lấy mã quốc gia và emoji cờ
-        country_code = message.get('country_code', 'VN')
-        flag = get_flag_emoji(country_code)
+// Log để kiểm tra giá trị
+console.log("unpackAt:", unpackAt);
+console.log("Diamond Count:", diamondCount);
+console.log("People Count:", peopleCount);
+console.log("TikTok ID:", tiktokId);
 
-        # Emoji lửa nếu đủ điều kiện
-        fire_emoji = "🔥" if message['ratio'] >= 10 and message['diamond_count'] >= 100 else ""
-        special_box_message = " <b>🚀🔥 Rương Đặc Biệt! 🔥🚀</b>\n" if message['ratio'] >= 10 and message['diamond_count'] >= 100 else ""
+let box = `${diamondCount}/${peopleCount}`; // Ghép diamond_count và people_count
 
-        # Thời gian sử dụng (dựa trên get_remaining_time)
-        remaining_time = get_remaining_time(json_file_path)
-        if isinstance(remaining_time, str):
-            hsd_text = f"• HSD: {remaining_time}"
-            id_text = "END_TIME"
-            url_text = "tiktok.com/share/*END_TIME*/live"
-        else:
-            remaining_hours, remaining_minutes = remaining_time
-            hsd_text = f"• HSD:     {remaining_hours}h {remaining_minutes}p"
+// Kiểm tra nếu không có `unpack_at` hoặc `unpack_at` không hợp lệ
+if (isNaN(unpackAt)) {
+    document.getElementById('countdown').textContent = 'Không có thông tin thời gian hết hạn!';
+    throw new Error('unpack_at is missing or invalid in the URL');
+}
 
-            # Kiểm tra tỷ lệ để điều chỉnh ID và URL
-            if message['ratio'] > 2:
-                id_text = "***_***"
-                url_text = "Tiktok.com/share/live/***_***"
-            else:
-                id_text = f"<b>{message['tiktok_id']}</b>"
-                url_text = f"<b>{html.escape(message['url'])}</b>"
+// Lấy thời gian hiện tại
+const currentTime = Math.floor(Date.now() / 1000); // Thời gian hiện tại (timestamp dạng giây)
 
-        # Tạo URL đếm ngược với unpack_at và thêm thông tin id và box
-        github_link = (
-            f"https://thanhtai9832.github.io/realtime/?unpack_at={message['unpack_at']}"
-            f"&diamond_count={message['diamond_count']}"
-            f"&people_count={message['people_count']}"
-        )
+// Trừ độ trễ 0.6 giây
+const offset = 0.6; // Độ trễ (giây)
 
-        # Lấy "time hết hạn" (expiry time)
-        expiry_time = message.get('expiry_time', '04:12:59')
+// Tính thời gian còn lại, đảm bảo không âm
+let remainingTime = Math.max((unpackAt - currentTime - offset) * 1000, 0); // Chuyển sang mili giây
+const expiryTime = new Date(unpackAt * 1000).toLocaleTimeString('vi-VN', { hour12: false }); // Thời gian hết hạn
 
-        # Tạo nội dung tin nhắn
-        full_message = (
-            f"• ID:    {id_text}\n"
-            f"• {url_text}\n"
-            f"{special_box_message}"
-            f"• Box:    <b>{message['diamond_count']}</b>/<b>{message['people_count']}</b>   "
-            f"View: <b>{message.get('total', 'Không rõ')}</b>\n"
-            f"• Ratio:    <b>{message['ratio']:.1f}</b> xu {fire_emoji}   {flag}\n"
-            f"• Time: <a href='{github_link}'>{message['remaining_time'] // 60:02}:{message['remaining_time'] % 60:02}s</a> "
-            f"(<b>{expiry_time}</b>)\n"
-            f"• Lives:    <b>{current_rooms_count}/{total_rooms}</b>\n"
-            f"{hsd_text}"
-        )
-        logging.info(f"Nội dung tin nhắn sẽ gửi:\n{full_message}")
+// Hàm định dạng thời gian đếm ngược (phút:giây:1/10 giây)
+function formatCountdown(milliseconds) {
+    const totalSeconds = Math.floor(milliseconds / 1000);
+    const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+    const seconds = String(totalSeconds % 60).padStart(2, '0');
+    const tenths = String(Math.floor((milliseconds % 1000) / 100)); // Lấy phần 1/10 giây
+    return `${minutes}:${seconds}:${tenths}`;
+}
 
-        # Cấu hình API Telegram
-        url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
-        data = {
-            'chat_id': chat_id,
-            'text': full_message,
-            'parse_mode': 'HTML'
-        }
-
-        # Gửi yêu cầu tới Telegram API
-        async with aiohttp.ClientSession() as session:
-            async with session.post(url, data=data) as response:
-                if response.status == 200:
-                    logging.info("Tin nhắn đã được gửi thành công qua Telegram.")
-                else:
-                    logging.error(f"Lỗi khi gửi tin nhắn Telegram. Mã trạng thái: {response.status}. Nội dung lỗi: {await response.text()}")
-
-    except Exception as e:
-        logging.error(f"Lỗi khi gửi tin nhắn Telegram: {e}") 
+// Hiển thị và cập nhật bộ đếm
+const countdownElement = document.getElementById('countdown');
+const timer = setInterval(() => {
+    if (remainingTime <= 0) {
+        clearInterval(timer);
+        countdownElement.innerHTML = `
+            TikTok ID: ${tiktokId}<br><br> <!-- Hiển thị TikTok ID -->
+            ${box}<br><br>
+            Hết giờ!<br><br>
+            ${expiryTime}
+        `;
+    } else {
+        countdownElement.innerHTML = `
+            TikTok ID: ${tiktokId}<br><br> <!-- Hiển thị TikTok ID -->
+            ${box}<br><br>
+            ${formatCountdown(remainingTime)}<br><br>
+            ${expiryTime}
+        `;
+    }
+    remainingTime -= 100; // Giảm thời gian còn lại mỗi 100ms (tương ứng 1/10 giây)
+}, 100); // Cập nhật mỗi 100ms
