@@ -46,17 +46,17 @@ const timer = setInterval(() => {
     if (remainingTime <= 0) {
         clearInterval(timer);
         countdownElement.innerHTML = `
-            <span style="color: black;">${tiktokId}</span><br><br>
-            ${box}<br><br>
-            Hết giờ!<br><br>
-            ${expiryTime}
+            <span style="color: black; font-size: 16px;">${tiktokId}</span><br><br>
+            <span style="color: black; font-size: 16px;">${box}</span><br><br>
+            <span style="color: black; font-size: 24px; font-weight: bold;">Hết giờ!</span><br><br>
+            <span style="color: black; font-size: 16px;">${expiryTime}</span>
         `;
     } else {
         countdownElement.innerHTML = `
-            <span style="color: black;">${tiktokId}</span><br><br>
-            ${box}<br><br>
-            ${formatCountdown(remainingTime)}<br><br>
-            ${expiryTime}
+            <span style="color: black; font-size: 16px;">${tiktokId}</span><br><br>
+            <span style="color: black; font-size: 16px;">${box}</span><br><br>
+            <span style="color: black; font-size: 32px; font-weight: bold;">${formatCountdown(remainingTime)}</span><br><br>
+            <span style="color: black; font-size: 16px;">${expiryTime}</span>
         `;
     }
     remainingTime -= 100; // Giảm thời gian còn lại mỗi 100ms (tương ứng 1/10 giây)
