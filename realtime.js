@@ -54,7 +54,7 @@ const timer = setInterval(() => {
         countdownElement.innerHTML = `
             <span style="color: black; font-size: 34px;">Id -->  ${tiktokId}</span><br><br>
             <span style="color: #b30000; font-size: 34px;">${box}</span><br>
-            <span style="color: black; font-size: 100px; font-weight: bold;">${formatCountdown(remainingTime)}</span><br><br>
+            <span style="color: black; font-size: 120px; font-weight: bold;">${formatCountdown(remainingTime)}</span><br><br>
             <span style="color: black; font-size: 34px;">${expiryTime}</span>
         `;
     }
