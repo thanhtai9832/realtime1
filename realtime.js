@@ -35,7 +35,7 @@ const expiryTime = new Date(unpackAt * 1000).toLocaleTimeString('vi-VN', { hour1
 function formatCountdown(milliseconds) {
     const totalSeconds = Math.floor(milliseconds / 1000); // Tổng số giây
     const tenths = Math.floor((milliseconds % 1000) / 100); // Lấy phần mười của giây
-    return `${totalSeconds}:${tenths}`; // Ghép chuỗi giây và phần mười giây
+    return `${totalSeconds}.${tenths}`; // Ghép chuỗi giây và phần mười giây
 }
 
 
@@ -47,14 +47,14 @@ const timer = setInterval(() => {
         countdownElement.innerHTML = `
             <span style="color: black; font-size: 34px;">Id -->  ${tiktokId}</span><br><br>
             <span style="color: #b30000; font-size: 34px;">${box}</span><br>
-            <span style="color: black; font-size: 50px; font-weight: bold;">Hết giờ!</span><br><br>
+            <span style="color: black; font-size: 70px; font-weight: bold;">Hết giờ!</span><br><br>
             <span style="color: black; font-size: 34px;">${expiryTime}</span>
         `;
     } else {
         countdownElement.innerHTML = `
             <span style="color: black; font-size: 34px;">Id -->  ${tiktokId}</span><br><br>
             <span style="color: #b30000; font-size: 34px;">${box}</span><br>
-            <span style="color: black; font-size: 70px; font-weight: bold;">${formatCountdown(remainingTime)}</span><br><br>
+            <span style="color: black; font-size: 100px; font-weight: bold;">${formatCountdown(remainingTime)}</span><br><br>
             <span style="color: black; font-size: 34px;">${expiryTime}</span>
         `;
     }
