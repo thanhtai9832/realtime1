@@ -33,12 +33,11 @@ const expiryTime = new Date(unpackAt * 1000).toLocaleTimeString('vi-VN', { hour1
 
 // Hàm định dạng thời gian đếm ngược (phút:giây:1/10 giây)
 function formatCountdown(milliseconds) {
-    const totalSeconds = Math.floor(milliseconds / 1000);
-    const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
-    const seconds = String(totalSeconds % 60).padStart(2, '0');
-    const tenths = String(Math.floor((milliseconds % 1000) / 100)); // Lấy phần 1/10 giây
-    return `${minutes}:${seconds}:${tenths}`;
+    const totalSeconds = Math.floor(milliseconds / 1000); // Tổng số giây
+    const tenths = Math.floor((milliseconds % 1000) / 100); // Lấy phần mười của giây
+    return `${totalSeconds}:${tenths}`; // Ghép chuỗi giây và phần mười giây
 }
+
 
 // Hiển thị và cập nhật bộ đếm
 const countdownElement = document.getElementById('countdown');
@@ -46,16 +45,16 @@ const timer = setInterval(() => {
     if (remainingTime <= 0) {
         clearInterval(timer);
         countdownElement.innerHTML = `
-            <span style="color: black; font-size: 34px;">Id -->  ${tiktokId}</span><br><br>
-            <span style="color: black; font-size: 34px;">${box}</span><br>
-            <span style="color: black; font-size: 38px; font-weight: bold;">Hết giờ!</span><br><br>
+            <span style="color: #b30000; font-size: 34px;">Id --> ${tiktokId}</span><br><br>
+            <span style="color: #b30000; font-size: 34px;">${box}</span><br>
+            <span style="color: black; font-size: 50px; font-weight: bold;">Hết giờ!</span><br><br>
             <span style="color: black; font-size: 34px;">${expiryTime}</span>
         `;
     } else {
         countdownElement.innerHTML = `
-            <span style="color: black; font-size: 34px;">Id --> ${tiktokId}</span><br><br>
-            <span style="color: black; font-size: 34px;">${box}</span><br>
-            <span style="color: black; font-size: 50px; font-weight: bold;">${formatCountdown(remainingTime)}</span><br><br>
+            <span style="color: #b30000; font-size: 34px;">Id --> ${tiktokId}</span><br><br>
+            <span style="color: #b30000; font-size: 34px;">${box}</span><br>
+            <span style="color: black; font-size: 70px; font-weight: bold;">${formatCountdown(remainingTime)}</span><br><br>
             <span style="color: black; font-size: 34px;">${expiryTime}</span>
         `;
     }
