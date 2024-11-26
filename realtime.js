@@ -21,15 +21,15 @@ if (isNaN(unpackAt)) {
     throw new Error('unpack_at is missing or invalid in the URL');
 }
 
-// Hàm lấy thời gian chuẩn từ WorldTimeAPI
+// Hàm lấy thời gian chuẩn từ TimeAPI.io
 async function getServerTime() {
     try {
-        const response = await fetch('https://worldtimeapi.org/api/timezone/Etc/UTC');
+        const response = await fetch('https://timeapi.io/api/Time/current/zone?timeZone=UTC');
         if (!response.ok) {
             throw new Error('Failed to fetch server time');
         }
         const data = await response.json();
-        return Math.floor(new Date(data.utc_datetime).getTime() / 1000); // Thời gian chuẩn (giây)
+        return Math.floor(new Date(data.dateTime).getTime() / 1000); // Thời gian chuẩn (giây)
     } catch (error) {
         console.error('Error fetching server time:', error);
         throw new Error('Could not retrieve server time');
