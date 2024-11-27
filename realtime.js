@@ -85,7 +85,7 @@ async function startCountdown() {
 
     setInterval(async () => {
         await updateTime();
-    }, 2000); 
+    }, 5000); 
     
 
 
