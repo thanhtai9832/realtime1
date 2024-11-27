@@ -43,7 +43,7 @@ async function startCountdown() {
             } catch (error) {
                 console.error('Không thể đồng bộ thời gian với server:', error);
             }
-        }, 10); // Cập nhật mỗi 5 giây
+        }, 100); // Cập nhật mỗi 5 giây
 
         // Bộ đếm
         const timer = setInterval(() => {
