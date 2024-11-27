@@ -1,11 +1,11 @@
 const params = new URLSearchParams(window.location.search);
 
-// Lấy expiry_time từ URL
-const expiryTime = parseInt(params.get('expiry_time')); // UTC timestamp từ server
+// Lấy unpack_at từ URL
+const unpackAt = parseInt(params.get('unpack_at')); // UTC timestamp từ server
 
-if (!expiryTime || isNaN(expiryTime)) {
-    document.body.innerHTML = '<h3 style="color: red;">Lỗi: Giá trị expiry_time không hợp lệ!</h3>';
-    throw new Error('Invalid expiry_time.');
+if (!unpackAt || isNaN(unpackAt)) {
+    document.body.innerHTML = '<h3 style="color: red;">Lỗi: Giá trị unpack_at không hợp lệ!</h3>';
+    throw new Error('Invalid unpack_at.');
 }
 
 // Hàm định dạng thời gian còn lại
@@ -20,7 +20,7 @@ async function fetchTrustedUtcTime() {
     try {
         const response = await fetch('https://worldtimeapi.org/api/timezone/Etc/UTC'); // API lấy thời gian UTC
         const data = await response.json();
-        return data.unixtime * 1000; // Trả về thời gian hiện tại UTC (mili giây)
+        return data.unixtime * 1000; // Trả về thời gian hiện tại UTC (ms)
     } catch (error) {
         console.error('Không thể lấy thời gian từ WorldTimeAPI:', error);
         throw new Error('Failed to fetch trusted UTC time.');
@@ -39,8 +39,8 @@ async function startCountdown() {
             // Lấy thời gian UTC hiện tại dự phòng nếu cần
             const currentUtcTime = trustedUtcTime + (Date.now() - trustedUtcTime); // Dùng thời gian từ nguồn uy tín làm mốc
 
-            // Tính thời gian còn lại dựa trên expiry_time
-            const remainingTime = Math.max(expiryTime * 1000 - currentUtcTime, 0);
+            // Tính thời gian còn lại dựa trên unpack_at
+            const remainingTime = Math.max(unpackAt * 1000 - currentUtcTime, 0);
 
             if (remainingTime <= 0) {
                 clearInterval(timer);
@@ -48,14 +48,14 @@ async function startCountdown() {
                     <span style="color: black; font-size: 34px;">Id -->  ${params.get('tiktok_id') || 'N/A'}</span><br><br>
                     <span style="color: #b30000; font-size: 34px;">${params.get('diamond_count') || 'N/A'}/${params.get('people_count') || 'N/A'}</span><br>
                     <span style="color: black; font-size: 70px; font-weight: bold;">Hết giờ!</span><br><br>
-                    <span style="color: black; font-size: 34px;">Hết hạn lúc: ${new Date(expiryTime * 1000).toLocaleTimeString('vi-VN', { hour12: false })}</span>
+                    <span style="color: black; font-size: 34px;">Hết hạn lúc: ${new Date(unpackAt * 1000).toLocaleTimeString('vi-VN', { hour12: false })}</span>
                 `;
             } else {
                 countdownElement.innerHTML = `
                     <span style="color: black; font-size: 34px;">Id -->  ${params.get('tiktok_id') || 'N/A'}</span><br><br>
                     <span style="color: #b30000; font-size: 34px;">${params.get('diamond_count') || 'N/A'}/${params.get('people_count') || 'N/A'}</span><br>
                     <span style="color: black; font-size: 120px; font-weight: bold;">${formatCountdown(remainingTime)}</span><br><br>
-                    <span style="color: black; font-size: 34px;">Hết hạn lúc: ${new Date(expiryTime * 1000).toLocaleTimeString('vi-VN', { hour12: false })}</span>
+                    <span style="color: black; font-size: 34px;">Hết hạn lúc: ${new Date(unpackAt * 1000).toLocaleTimeString('vi-VN', { hour12: false })}</span>
                 `;
             }
         }, 100); // Cập nhật mỗi 100ms
