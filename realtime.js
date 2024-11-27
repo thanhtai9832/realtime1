@@ -15,34 +15,54 @@ function formatCountdown(milliseconds) {
     return `${totalSeconds}.${tenths}`;
 }
 
+// Hàm lấy thời gian UTC hiện tại từ nguồn uy tín
+async function fetchTrustedUtcTime() {
+    try {
+        const response = await fetch('https://worldtimeapi.org/api/timezone/Etc/UTC'); // API lấy thời gian UTC
+        const data = await response.json();
+        return data.unixtime * 1000; // Trả về thời gian hiện tại UTC (mili giây)
+    } catch (error) {
+        console.error('Không thể lấy thời gian từ WorldTimeAPI:', error);
+        throw new Error('Failed to fetch trusted UTC time.');
+    }
+}
+
 // Bắt đầu bộ đếm
-function startCountdown() {
+async function startCountdown() {
     const countdownElement = document.getElementById('countdown');
 
-    const timer = setInterval(() => {
-        // Lấy thời gian UTC hiện tại từ client
-        const currentUtcTime = Date.now(); // Thời gian hiện tại tính bằng mili giây từ Epoch (UTC)
-        
-        // Tính thời gian còn lại dựa trên expiry_time
-        const remainingTime = Math.max(expiryTime * 1000 - currentUtcTime, 0);
+    try {
+        // Lấy thời gian UTC hiện tại từ nguồn uy tín
+        const trustedUtcTime = await fetchTrustedUtcTime();
 
-        if (remainingTime <= 0) {
-            clearInterval(timer);
-            countdownElement.innerHTML = `
-                <span style="color: black; font-size: 34px;">Id -->  ${params.get('tiktok_id') || 'N/A'}</span><br><br>
-                <span style="color: #b30000; font-size: 34px;">${params.get('diamond_count') || 'N/A'}/${params.get('people_count') || 'N/A'}</span><br>
-                <span style="color: black; font-size: 70px; font-weight: bold;">Hết giờ!</span><br><br>
-                <span style="color: black; font-size: 34px;">Hết hạn lúc: ${new Date(expiryTime * 1000).toLocaleTimeString('vi-VN', { hour12: false })}</span>
-            `;
-        } else {
-            countdownElement.innerHTML = `
-                <span style="color: black; font-size: 34px;">Id -->  ${params.get('tiktok_id') || 'N/A'}</span><br><br>
-                <span style="color: #b30000; font-size: 34px;">${params.get('diamond_count') || 'N/A'}/${params.get('people_count') || 'N/A'}</span><br>
-                <span style="color: black; font-size: 120px; font-weight: bold;">${formatCountdown(remainingTime)}</span><br><br>
-                <span style="color: black; font-size: 34px;">Hết hạn lúc: ${new Date(expiryTime * 1000).toLocaleTimeString('vi-VN', { hour12: false })}</span>
-            `;
-        }
-    }, 100); // Cập nhật mỗi 100ms
+        const timer = setInterval(() => {
+            // Lấy thời gian UTC hiện tại dự phòng nếu cần
+            const currentUtcTime = trustedUtcTime + (Date.now() - trustedUtcTime); // Dùng thời gian từ nguồn uy tín làm mốc
+
+            // Tính thời gian còn lại dựa trên expiry_time
+            const remainingTime = Math.max(expiryTime * 1000 - currentUtcTime, 0);
+
+            if (remainingTime <= 0) {
+                clearInterval(timer);
+                countdownElement.innerHTML = `
+                    <span style="color: black; font-size: 34px;">Id -->  ${params.get('tiktok_id') || 'N/A'}</span><br><br>
+                    <span style="color: #b30000; font-size: 34px;">${params.get('diamond_count') || 'N/A'}/${params.get('people_count') || 'N/A'}</span><br>
+                    <span style="color: black; font-size: 70px; font-weight: bold;">Hết giờ!</span><br><br>
+                    <span style="color: black; font-size: 34px;">Hết hạn lúc: ${new Date(expiryTime * 1000).toLocaleTimeString('vi-VN', { hour12: false })}</span>
+                `;
+            } else {
+                countdownElement.innerHTML = `
+                    <span style="color: black; font-size: 34px;">Id -->  ${params.get('tiktok_id') || 'N/A'}</span><br><br>
+                    <span style="color: #b30000; font-size: 34px;">${params.get('diamond_count') || 'N/A'}/${params.get('people_count') || 'N/A'}</span><br>
+                    <span style="color: black; font-size: 120px; font-weight: bold;">${formatCountdown(remainingTime)}</span><br><br>
+                    <span style="color: black; font-size: 34px;">Hết hạn lúc: ${new Date(expiryTime * 1000).toLocaleTimeString('vi-VN', { hour12: false })}</span>
+                `;
+            }
+        }, 100); // Cập nhật mỗi 100ms
+    } catch (error) {
+        countdownElement.innerHTML = '<h3 style="color: red;">Không thể khởi tạo bộ đếm do lỗi thời gian!</h3>';
+        console.error('Error starting countdown:', error);
+    }
 }
 
 // Gọi hàm để bắt đầu bộ đếm
