@@ -16,7 +16,7 @@ if (!unpackAt || isNaN(unpackAt)) {
 // Hàm gọi API để lấy remainingTime
 async function fetchRemainingTime(unpackAt) {
     try {
-        const apiUrl = `https://realtime-67lx.onrender.com/get-unpack-at?unpack_at=${unpackAt}`;
+        const apiUrl = `https://cors-anywhere.herokuapp.com/https://realtime-67lx.onrender.com/get-unpack-at?unpack_at=${unpackAt}`;
         const response = await fetch(apiUrl);
 
         if (!response.ok) throw new Error(`Failed to fetch from server. Status: ${response.status}`);
