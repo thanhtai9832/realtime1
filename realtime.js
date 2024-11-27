@@ -2,37 +2,38 @@
 const params = new URLSearchParams(window.location.search);
 
 // Lấy các tham số từ URL và log để kiểm tra
-let unpackAt = parseInt(params.get('unpack_at'), 10); // Thời gian hết hạn
+let envelopeId = params.get('envelope_id'); // Lấy envelope_id từ URL
 let diamondCount = params.get('diamond_count') || 'N/A'; // Số lượng kim cương
 let peopleCount = params.get('people_count') || 'N/A'; // Số lượng người
 let tiktokId = params.get('tiktok_id') || 'N/A'; // TikTok ID
 
 // Log để kiểm tra giá trị
-console.log("unpackAt:", unpackAt);
+console.log("Envelope ID:", envelopeId);
 console.log("Diamond Count:", diamondCount);
 console.log("People Count:", peopleCount);
 console.log("TikTok ID:", tiktokId);
 
 let box = `${diamondCount}/${peopleCount}`; // Ghép diamond_count và people_count
 
-// Kiểm tra nếu không có `unpack_at` hoặc `unpack_at` không hợp lệ
-if (isNaN(unpackAt)) {
-    document.getElementById('countdown').textContent = 'Không có thông tin thời gian hết hạn!';
-    throw new Error('unpack_at is missing or invalid in the URL');
+// Kiểm tra nếu không có `envelope_id`
+if (!envelopeId) {
+    document.getElementById('countdown').textContent = 'Không có thông tin Envelope ID!';
+    throw new Error('envelope_id is missing in the URL');
 }
 
-// Hàm lấy thời gian chuẩn từ TimeAPI.io
-async function getServerTime() {
+// Hàm gọi API máy chủ để lấy unpack_at và remainingTime
+async function fetchUnpackAt(envelopeId) {
     try {
-        const response = await fetch('https://timeapi.io/api/Time/current/zone?timeZone=UTC');
+        const response = await fetch(`https://realtime-67lx.onrender.com/get-unpack-at?envelope_id=${envelopeId}`);
         if (!response.ok) {
-            throw new Error('Failed to fetch server time');
+            throw new Error('Failed to fetch unpack_at from the server');
         }
         const data = await response.json();
-        return Math.floor(new Date(data.dateTime).getTime() / 1000); // Thời gian chuẩn (giây)
+        console.log("Fetched data from server:", data);
+        return data;
     } catch (error) {
-        console.error('Error fetching server time:', error);
-        throw new Error('Could not retrieve server time');
+        console.error('Error fetching unpack_at from server:', error);
+        throw new Error('Could not retrieve unpack_at from server');
     }
 }
 
@@ -46,16 +47,16 @@ function formatCountdown(milliseconds) {
 // Hiển thị và cập nhật bộ đếm
 async function startCountdown() {
     try {
-        const serverTime = await getServerTime(); // Lấy thời gian chuẩn từ API
-        const offset = 0.6; // Độ trễ (giây)
+        // Gọi API máy chủ để lấy thông tin unpack_at và remainingTime
+        const { unpackAt, remainingTime } = await fetchUnpackAt(envelopeId);
 
-        // Tính thời gian còn lại, đảm bảo không âm
-        let remainingTime = Math.max((unpackAt - serverTime - offset) * 1000, 0); // Chuyển sang mili giây
+        const offset = 0.6; // Độ trễ (giây)
+        let remainingMs = Math.max(remainingTime * 1000 - offset * 1000, 0); // Thời gian còn lại (ms)
         const expiryTime = new Date(unpackAt * 1000).toLocaleTimeString('vi-VN', { hour12: false }); // Thời gian hết hạn
 
         const countdownElement = document.getElementById('countdown');
         const timer = setInterval(() => {
-            if (remainingTime <= 0) {
+            if (remainingMs <= 0) {
                 clearInterval(timer);
                 countdownElement.innerHTML = `
                     <span style="color: black; font-size: 34px;">Id -->  ${tiktokId}</span><br><br>
@@ -67,11 +68,11 @@ async function startCountdown() {
                 countdownElement.innerHTML = `
                     <span style="color: black; font-size: 34px;">Id -->  ${tiktokId}</span><br><br>
                     <span style="color: #b30000; font-size: 34px;">${box}</span><br>
-                    <span style="color: black; font-size: 120px; font-weight: bold;">${formatCountdown(remainingTime)}</span><br><br>
+                    <span style="color: black; font-size: 120px; font-weight: bold;">${formatCountdown(remainingMs)}</span><br><br>
                     <span style="color: black; font-size: 34px;">${expiryTime}</span>
                 `;
             }
-            remainingTime -= 100; // Giảm thời gian còn lại mỗi 100ms (tương ứng 1/10 giây)
+            remainingMs -= 100; // Giảm thời gian còn lại mỗi 100ms (tương ứng 1/10 giây)
         }, 100); // Cập nhật mỗi 100ms
     } catch (error) {
         document.getElementById('countdown').textContent = 'Không thể tải thời gian từ server!';
