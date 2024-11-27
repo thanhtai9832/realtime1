@@ -1,19 +1,19 @@
-// Lấy tham số từ URL
+
 const params = new URLSearchParams(window.location.search);
 
-// Lấy thông tin từ URL
-const unpackAt = params.get('unpack_at'); // Lấy unpack_at
+
+const unpackAt = params.get('unpack_at'); 
 const diamondCount = params.get('diamond_count') || 'N/A';
 const peopleCount = params.get('people_count') || 'N/A';
 const tiktokId = params.get('tiktok_id') || 'N/A';
 
-// Kiểm tra nếu thiếu giá trị unpack_at
+
 if (!unpackAt || isNaN(unpackAt)) {
     document.body.innerHTML = '<h3 style="color: red;">Lỗi: Giá trị unpack_at không hợp lệ!</h3>';
     throw new Error('unpack_at is missing or invalid.');
 }
 
-// Hàm gọi API để lấy remainingTime
+
 async function fetchRemainingTime(unpackAt) {
     try {
         const apiUrl = `https://realtime-67lx.onrender.com/get-unpack-at?unpack_at=${unpackAt}`;
@@ -27,7 +27,7 @@ async function fetchRemainingTime(unpackAt) {
             throw new Error('No remainingTime found for this unpack_at.');
         }
 
-        return data.remainingTime; // Trả về remainingTime
+        return data.remainingTime; 
     } catch (error) {
         console.error('Error fetching remainingTime:', error);
         document.body.innerHTML = `<h3 style="color: red;">Không thể tải thời gian từ server!</h3>`;
@@ -35,23 +35,23 @@ async function fetchRemainingTime(unpackAt) {
     }
 }
 
-// Hàm định dạng thời gian đếm ngược (phút:giây:1/10 giây)
+
 function formatCountdown(milliseconds) {
-    const totalSeconds = Math.floor(milliseconds / 1000); // Tổng số giây
-    const tenths = Math.floor((milliseconds % 1000) / 100); // Lấy phần mười của giây
-    return `${totalSeconds}.${tenths}`; // Ghép chuỗi giây và phần mười giây
+    const totalSeconds = Math.floor(milliseconds / 1000); 
+    const tenths = Math.floor((milliseconds % 1000) / 100); 
+    return `${totalSeconds}.${tenths}`; 
 }
 
-// Hiển thị và cập nhật bộ đếm
+
 async function startCountdown() {
     const countdownElement = document.getElementById('countdown');
-    let timeLeft = 0; // Biến lưu thời gian còn lại
+    let timeLeft = 0; 
 
     async function updateTime() {
         try {
-            // Gọi API để lấy remainingTime
+           
             const remainingTime = await fetchRemainingTime(unpackAt);
-            timeLeft = remainingTime * 1000; // Chuyển remainingTime sang mili giây
+            timeLeft = remainingTime * 1000; 
         } catch (error) {
             console.error('Lỗi khi cập nhật remainingTime:', error);
             countdownElement.innerHTML = '<h3 style="color: red;">Không thể tải thời gian từ server!</h3>';
@@ -59,10 +59,10 @@ async function startCountdown() {
         }
     }
 
-    // Gọi API lần đầu để lấy remainingTime
+    
     await updateTime();
 
-    // Bộ đếm hiển thị
+    
     const timer = setInterval(() => {
         if (timeLeft <= 0) {
             clearInterval(timer);
@@ -80,14 +80,13 @@ async function startCountdown() {
                 <span style="color: black; font-size: 34px;">Hết hạn lúc: ${new Date(unpackAt * 1000).toLocaleTimeString('vi-VN', { hour12: false })}</span>
             `;
         }
-        timeLeft -= 100; // Giảm thời gian mỗi 100ms
-    }, 100); // Cập nhật mỗi 100ms
+        timeLeft -= 100; 
+    }, 100);
 
-    // Định kỳ gọi lại API mỗi 5 giây để đồng bộ thời gian từ server
     setInterval(async () => {
         await updateTime();
-    }, 3000); // Gọi lại API sau mỗi 5 giây
-}
+    }, 2000); 
+    
 
-// Bắt đầu bộ đếm
+
 startCountdown();
