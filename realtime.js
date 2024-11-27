@@ -86,7 +86,7 @@ async function startCountdown() {
     // Định kỳ gọi lại API mỗi 5 giây để đồng bộ thời gian từ server
     setInterval(async () => {
         await updateTime();
-    }, 5000); // Gọi lại API sau mỗi 5 giây
+    }, 3000); // Gọi lại API sau mỗi 5 giây
 }
 
 // Bắt đầu bộ đếm
