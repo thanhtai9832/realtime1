@@ -33,29 +33,31 @@ async function startCountdown() {
 
     try {
         // Lấy thời gian UTC hiện tại từ nguồn uy tín
-        const trustedUtcTime = await fetchTrustedUtcTime(); // Lấy chính xác thời gian hiện tại từ API
+        let trustedUtcTime = await fetchTrustedUtcTime(); // Lấy chính xác thời gian hiện tại từ API
 
         const timer = setInterval(() => {
-            // Tính thời gian còn lại dựa trên unpack_at và thời gian UTC từ API
-            const currentUtcTime = trustedUtcTime; // Không cần Date.now(), chỉ lấy thời gian từ API
-            const remainingTime = Math.max(unpackAt * 1000 - currentUtcTime, 0);
+            // Tính thời gian còn lại dựa trên unpack_at và trustedUtcTime
+            const remainingTime = Math.max(unpackAt * 1000 - trustedUtcTime, 0);
 
             if (remainingTime <= 0) {
                 clearInterval(timer);
                 countdownElement.innerHTML = `
-                    <span style="color: black; font-size: 34px;">Id >   ${params.get('tiktok_id') || 'N/A'}</span><br><br>
+                    <span style="color: black; font-size: 34px;">Id >>   ${params.get('tiktok_id') || 'N/A'}</span><br><br>
                     <span style="color: #b30000; font-size: 34px;">${params.get('diamond_count') || 'N/A'}/${params.get('people_count') || 'N/A'}</span><br>
                     <span style="color: black; font-size: 70px; font-weight: bold;">Hết giờ!</span><br><br>
                     <span style="color: black; font-size: 34px;">Hết hạn lúc: ${new Date(unpackAt * 1000).toLocaleTimeString('vi-VN', { hour12: false })}</span>
                 `;
             } else {
                 countdownElement.innerHTML = `
-                    <span style="color: black; font-size: 34px;">Id >   ${params.get('tiktok_id') || 'N/A'}</span><br><br>
+                    <span style="color: black; font-size: 34px;">Id >>   ${params.get('tiktok_id') || 'N/A'}</span><br><br>
                     <span style="color: #b30000; font-size: 34px;">${params.get('diamond_count') || 'N/A'}/${params.get('people_count') || 'N/A'}</span><br>
                     <span style="color: black; font-size: 120px; font-weight: bold;">${formatCountdown(remainingTime)}</span><br><br>
                     <span style="color: black; font-size: 34px;">Hết hạn lúc: ${new Date(unpackAt * 1000).toLocaleTimeString('vi-VN', { hour12: false })}</span>
                 `;
             }
+
+            // Cập nhật trustedUtcTime thêm 100ms mỗi chu kỳ để giữ cho thời gian thực tế chạy đúng
+            trustedUtcTime += 100;
         }, 100); // Cập nhật mỗi 100ms
     } catch (error) {
         countdownElement.innerHTML = '<h3 style="color: red;">Không thể khởi tạo bộ đếm do lỗi thời gian!</h3>';
