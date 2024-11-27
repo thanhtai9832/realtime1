@@ -62,9 +62,16 @@ async function startCountdown() {
     // Gọi API lần đầu để lấy remainingTime
     await updateTime();
 
+    // Lấy thời gian bắt đầu thực tế từ máy khách
+    const startTime = Date.now();
+
     // Cập nhật hiển thị thời gian đếm ngược
-    const timer = setInterval(async () => {
-        if (timeLeft <= 0) {
+    const timer = setInterval(() => {
+        // Cập nhật thời gian còn lại dựa trên sự chênh lệch thời gian thực
+        const elapsed = Date.now() - startTime; // Thời gian đã trôi qua
+        const currentRemaining = timeLeft - elapsed; // Tính thời gian còn lại chính xác
+
+        if (currentRemaining <= 0) {
             clearInterval(timer);
             countdownElement.innerHTML = `
                 <span style="color: black; font-size: 34px;">Id -->  ${tiktokId}</span><br><br>
@@ -76,15 +83,14 @@ async function startCountdown() {
             countdownElement.innerHTML = `
                 <span style="color: black; font-size: 34px;">Id -->  ${tiktokId}</span><br><br>
                 <span style="color: #b30000; font-size: 34px;">${diamondCount}/${peopleCount}</span><br>
-                <span style="color: black; font-size: 120px; font-weight: bold;">${formatCountdown(timeLeft)}</span><br><br>
+                <span style="color: black; font-size: 120px; font-weight: bold;">${formatCountdown(currentRemaining)}</span><br><br>
                 <span style="color: black; font-size: 34px;">Hết hạn lúc: ${new Date(unpackAt * 1000).toLocaleTimeString('vi-VN', { hour12: false })}</span>
             `;
         }
-        timeLeft -= 100; // Giảm thời gian mỗi 100ms
 
-        // Định kỳ gọi lại API mỗi giây để đồng bộ thời gian từ server
-        if (Math.floor(timeLeft / 1000) % 1 === 0) {
-            await updateTime();
+        // Nếu thời gian còn lại bị chênh lệch lớn so với server, đồng bộ lại
+        if (Math.floor(currentRemaining / 1000) % 1 === 0) {
+            updateTime(); // Gọi API để đồng bộ
         }
     }, 100); // Cập nhật mỗi 100ms
 }
