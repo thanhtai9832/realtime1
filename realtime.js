@@ -33,13 +33,11 @@ async function startCountdown() {
 
     try {
         // Lấy thời gian UTC hiện tại từ nguồn uy tín
-        const trustedUtcTime = await fetchTrustedUtcTime();
+        const trustedUtcTime = await fetchTrustedUtcTime(); // Lấy chính xác thời gian hiện tại từ API
 
         const timer = setInterval(() => {
-            // Lấy thời gian UTC hiện tại dự phòng nếu cần
-            const currentUtcTime = trustedUtcTime + (Date.now() - trustedUtcTime); // Dùng thời gian từ nguồn uy tín làm mốc
-
-            // Tính thời gian còn lại dựa trên unpack_at
+            // Tính thời gian còn lại dựa trên unpack_at và thời gian UTC từ API
+            const currentUtcTime = trustedUtcTime; // Không cần Date.now(), chỉ lấy thời gian từ API
             const remainingTime = Math.max(unpackAt * 1000 - currentUtcTime, 0);
 
             if (remainingTime <= 0) {
