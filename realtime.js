@@ -1,16 +1,12 @@
 const params = new URLSearchParams(window.location.search);
 
-// Lấy server_time và expiry_time từ URL
-const serverTime = parseInt(params.get('server_time')); // UTC timestamp từ server
+// Lấy expiry_time từ URL
 const expiryTime = parseInt(params.get('expiry_time')); // UTC timestamp từ server
 
-if (!serverTime || isNaN(serverTime) || !expiryTime || isNaN(expiryTime)) {
-    document.body.innerHTML = '<h3 style="color: red;">Lỗi: Giá trị thời gian không hợp lệ!</h3>';
-    throw new Error('Invalid server_time or expiry_time.');
+if (!expiryTime || isNaN(expiryTime)) {
+    document.body.innerHTML = '<h3 style="color: red;">Lỗi: Giá trị expiry_time không hợp lệ!</h3>';
+    throw new Error('Invalid expiry_time.');
 }
-
-// Tính offset giữa server_time và thời gian thực của client
-const offset = serverTime * 1000 - Date.now(); // Chênh lệch giữa server và client
 
 // Hàm định dạng thời gian còn lại
 function formatCountdown(milliseconds) {
@@ -24,8 +20,11 @@ function startCountdown() {
     const countdownElement = document.getElementById('countdown');
 
     const timer = setInterval(() => {
+        // Lấy thời gian UTC hiện tại từ client
+        const currentUtcTime = Date.now(); // Thời gian hiện tại tính bằng mili giây từ Epoch (UTC)
+        
         // Tính thời gian còn lại dựa trên expiry_time
-        const remainingTime = Math.max(expiryTime * 1000 - (Date.now() + offset), 0);
+        const remainingTime = Math.max(expiryTime * 1000 - currentUtcTime, 0);
 
         if (remainingTime <= 0) {
             clearInterval(timer);
@@ -46,4 +45,5 @@ function startCountdown() {
     }, 100); // Cập nhật mỗi 100ms
 }
 
+// Gọi hàm để bắt đầu bộ đếm
 startCountdown();
