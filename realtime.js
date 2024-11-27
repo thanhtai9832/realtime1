@@ -35,6 +35,17 @@ async function startCountdown() {
         // Lấy thời gian UTC hiện tại từ nguồn uy tín
         let trustedUtcTime = await fetchTrustedUtcTime(); // Lấy chính xác thời gian hiện tại từ API
 
+        // Đồng bộ lại thời gian với API sau mỗi 5 giây
+        setInterval(async () => {
+            try {
+                trustedUtcTime = await fetchTrustedUtcTime(); // Cập nhật trustedUtcTime từ API
+                console.log('Đồng bộ thời gian với server:', new Date(trustedUtcTime).toISOString());
+            } catch (error) {
+                console.error('Không thể đồng bộ thời gian với server:', error);
+            }
+        }, 5000); // Cập nhật mỗi 5 giây
+
+        // Bộ đếm
         const timer = setInterval(() => {
             // Tính thời gian còn lại dựa trên unpack_at và trustedUtcTime
             const remainingTime = Math.max(unpackAt * 1000 - trustedUtcTime, 0);
@@ -42,14 +53,14 @@ async function startCountdown() {
             if (remainingTime <= 0) {
                 clearInterval(timer);
                 countdownElement.innerHTML = `
-                    <span style="color: black; font-size: 34px;">Id >>   ${params.get('tiktok_id') || 'N/A'}</span><br><br>
+                    <span style="color: black; font-size: 34px;">Id >   ${params.get('tiktok_id') || 'N/A'}</span><br><br>
                     <span style="color: #b30000; font-size: 34px;">${params.get('diamond_count') || 'N/A'}/${params.get('people_count') || 'N/A'}</span><br>
                     <span style="color: black; font-size: 70px; font-weight: bold;">Hết giờ!</span><br><br>
                     <span style="color: black; font-size: 34px;">Hết hạn lúc: ${new Date(unpackAt * 1000).toLocaleTimeString('vi-VN', { hour12: false })}</span>
                 `;
             } else {
                 countdownElement.innerHTML = `
-                    <span style="color: black; font-size: 34px;">Id >>   ${params.get('tiktok_id') || 'N/A'}</span><br><br>
+                    <span style="color: black; font-size: 34px;">Id >   ${params.get('tiktok_id') || 'N/A'}</span><br><br>
                     <span style="color: #b30000; font-size: 34px;">${params.get('diamond_count') || 'N/A'}/${params.get('people_count') || 'N/A'}</span><br>
                     <span style="color: black; font-size: 120px; font-weight: bold;">${formatCountdown(remainingTime)}</span><br><br>
                     <span style="color: black; font-size: 34px;">Hết hạn lúc: ${new Date(unpackAt * 1000).toLocaleTimeString('vi-VN', { hour12: false })}</span>
