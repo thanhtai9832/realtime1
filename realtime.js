@@ -9,25 +9,28 @@ const tiktokId = params.get('tiktok_id') || 'N/A';
 
 // Kiểm tra nếu thiếu giá trị `unpack_at`
 if (!unpackAt || isNaN(unpackAt)) {
-    document.body.innerHTML = 'Lỗi: Giá trị unpack_at không hợp lệ!';
+    document.body.innerHTML = '<h3 style="color: red;">Lỗi: Giá trị unpack_at không hợp lệ!</h3>';
     throw new Error('unpack_at is missing or invalid.');
 }
 
 // Hàm gọi API để lấy remainingTime
 async function fetchRemainingTime(unpackAt) {
     try {
-        const response = await fetch(`https://realtime-67lx.onrender.com/get-unpack-at?unpack_at=${unpackAt}`);
-        if (!response.ok) throw new Error('Failed to fetch remainingTime from server.');
+        const apiUrl = `https://realtime-67lx.onrender.com/get-unpack-at?unpack_at=${unpackAt}`;
+        const response = await fetch(apiUrl);
 
+        if (!response.ok) throw new Error(`Failed to fetch from server. Status: ${response.status}`);
         const data = await response.json();
+
+        if (data.error) throw new Error(data.error);
         if (!data.remainingTime && data.remainingTime !== 0) {
             throw new Error('No remainingTime found for this unpack_at.');
         }
 
         return data.remainingTime; // Trả về remainingTime
     } catch (error) {
-        console.error(error);
-        document.body.innerHTML = 'Không thể tải thời gian từ server!';
+        console.error('Error fetching remainingTime:', error);
+        document.body.innerHTML = `<h3 style="color: red;">Không thể tải thời gian từ server!</h3>`;
         throw error;
     }
 }
@@ -48,7 +51,7 @@ async function startCountdown() {
 
         // Hiển thị thông tin ban đầu
         const countdownElement = document.getElementById('countdown');
-        let timeLeft = remainingTime * 1000; // Chuyển sang mili giây
+        let timeLeft = remainingTime * 1000; // Chuyển remainingTime sang mili giây
 
         const timer = setInterval(() => {
             if (timeLeft <= 0) {
@@ -71,7 +74,7 @@ async function startCountdown() {
         }, 100); // Cập nhật mỗi 100ms
     } catch (error) {
         console.error(error);
-        document.body.innerHTML = 'Không thể tải thời gian từ server!';
+        document.body.innerHTML = '<h3 style="color: red;">Không thể tải thời gian từ server!</h3>';
     }
 }
 
