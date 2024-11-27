@@ -43,14 +43,14 @@ async function startCountdown() {
             if (remainingTime <= 0) {
                 clearInterval(timer);
                 countdownElement.innerHTML = `
-                    <span style="color: black; font-size: 34px;">Id -->  ${params.get('tiktok_id') || 'N/A'}</span><br><br>
+                    <span style="color: black; font-size: 34px;">Id >   ${params.get('tiktok_id') || 'N/A'}</span><br><br>
                     <span style="color: #b30000; font-size: 34px;">${params.get('diamond_count') || 'N/A'}/${params.get('people_count') || 'N/A'}</span><br>
                     <span style="color: black; font-size: 70px; font-weight: bold;">Hết giờ!</span><br><br>
                     <span style="color: black; font-size: 34px;">Hết hạn lúc: ${new Date(unpackAt * 1000).toLocaleTimeString('vi-VN', { hour12: false })}</span>
                 `;
             } else {
                 countdownElement.innerHTML = `
-                    <span style="color: black; font-size: 34px;">Id -->  ${params.get('tiktok_id') || 'N/A'}</span><br><br>
+                    <span style="color: black; font-size: 34px;">Id >   ${params.get('tiktok_id') || 'N/A'}</span><br><br>
                     <span style="color: #b30000; font-size: 34px;">${params.get('diamond_count') || 'N/A'}/${params.get('people_count') || 'N/A'}</span><br>
                     <span style="color: black; font-size: 120px; font-weight: bold;">${formatCountdown(remainingTime)}</span><br><br>
                     <span style="color: black; font-size: 34px;">Hết hạn lúc: ${new Date(unpackAt * 1000).toLocaleTimeString('vi-VN', { hour12: false })}</span>
