@@ -7,7 +7,7 @@ const diamondCount = params.get('diamond_count') || 'N/A';
 const peopleCount = params.get('people_count') || 'N/A';
 const tiktokId = params.get('tiktok_id') || 'N/A';
 
-// Kiểm tra nếu thiếu giá trị `unpack_at`
+// Kiểm tra nếu thiếu giá trị unpack_at
 if (!unpackAt || isNaN(unpackAt)) {
     document.body.innerHTML = '<h3 style="color: red;">Lỗi: Giá trị unpack_at không hợp lệ!</h3>';
     throw new Error('unpack_at is missing or invalid.');
@@ -62,16 +62,9 @@ async function startCountdown() {
     // Gọi API lần đầu để lấy remainingTime
     await updateTime();
 
-    // Lấy thời gian bắt đầu thực tế từ máy khách
-    const startTime = Date.now();
-
-    // Cập nhật hiển thị thời gian đếm ngược
+    // Bộ đếm hiển thị
     const timer = setInterval(() => {
-        // Cập nhật thời gian còn lại dựa trên sự chênh lệch thời gian thực
-        const elapsed = Date.now() - startTime; // Thời gian đã trôi qua
-        const currentRemaining = timeLeft - elapsed; // Tính thời gian còn lại chính xác
-
-        if (currentRemaining <= 0) {
+        if (timeLeft <= 0) {
             clearInterval(timer);
             countdownElement.innerHTML = `
                 <span style="color: black; font-size: 34px;">Id -->  ${tiktokId}</span><br><br>
@@ -83,16 +76,17 @@ async function startCountdown() {
             countdownElement.innerHTML = `
                 <span style="color: black; font-size: 34px;">Id -->  ${tiktokId}</span><br><br>
                 <span style="color: #b30000; font-size: 34px;">${diamondCount}/${peopleCount}</span><br>
-                <span style="color: black; font-size: 120px; font-weight: bold;">${formatCountdown(currentRemaining)}</span><br><br>
+                <span style="color: black; font-size: 120px; font-weight: bold;">${formatCountdown(timeLeft)}</span><br><br>
                 <span style="color: black; font-size: 34px;">Hết hạn lúc: ${new Date(unpackAt * 1000).toLocaleTimeString('vi-VN', { hour12: false })}</span>
             `;
         }
-
-        // Nếu thời gian còn lại bị chênh lệch lớn so với server, đồng bộ lại
-        if (Math.floor(currentRemaining / 1000) % 1 === 0) {
-            updateTime(); // Gọi API để đồng bộ
-        }
+        timeLeft -= 100; // Giảm thời gian mỗi 100ms
     }, 100); // Cập nhật mỗi 100ms
+
+    // Định kỳ gọi lại API mỗi 5 giây để đồng bộ thời gian từ server
+    setInterval(async () => {
+        await updateTime();
+    }, 5000); // Gọi lại API sau mỗi 5 giây
 }
 
 // Bắt đầu bộ đếm
